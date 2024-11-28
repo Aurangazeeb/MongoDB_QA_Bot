@@ -17,6 +17,12 @@ def test_unsupported_user_query():
     assert unsupported_user_query_response_expected == unsupported_user_query_response_actual, "Mongo query generated is different"
 
 # mongo query to query result tests
+def test_querying_available_data():
+    user_query = ''
+    expected_query_response = 'The total population of North America in 2023 is 579,024,000.'
+    actual_query_response = query_handler.an
+
+def test_querying_unavailable_data():
 invalid_mongo_query
 invalid_mongo_query_result_expected
 invalid_mongo_query_result_actual
