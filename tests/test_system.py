@@ -1,6 +1,7 @@
 import pytest
-from bot_exceptions import DataNotFoundError, FieldMissingError, IncorrectYearError, ViolationOfDocumentStructureError
-from handle_query import QueryHandler
+from src.bot_exceptions import DataNotFoundError, FieldMissingError, IncorrectYearError, ViolationOfDocumentStructureError
+from src.handle_query import QueryHandler
+
 query_handler = QueryHandler()
 
 # user query to mongo query conversion tests
