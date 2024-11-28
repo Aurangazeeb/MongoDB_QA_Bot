@@ -38,3 +38,11 @@ Run the command :
 
 Output : 
 `"The economy of North America in 2023 is contributed by services at a rate of 65%."`
+
+## Testing App Functionalities
+The app functionality testing is automated via `run_system_test.sh` bash script.
+Make sure to convert it to an executable before running it. 
+
+**Note** : Inspite of many iterations of prompt engineering and inclusion of
+techniques like few-shot learning, due to the stochastic behaviour of LLM on
+rare occassions one or two of the tests may fail. In such a case, please run the bash script again
