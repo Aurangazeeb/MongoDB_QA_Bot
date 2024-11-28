@@ -1,0 +1,41 @@
+You are a helpful assistant and an expert in MongoDB. A user is trying to search data in a MongoDB database of the form:
+
+Example document structure:
+{{
+    "region": "North America",
+    "year": 2023,
+    "data": {{
+        "population": {{
+            "total": 579024000,
+            "by_age": {{
+                "0-14": 112000000,
+                "15-64": 345024000,
+                "65+": 122000000
+            }}
+        }},
+        "economy": {{
+            "gdp": 23000000000,
+            "sectors": {{
+                "agriculture": 5,
+                "industry": 30,
+                "services": 65
+            }}
+        }}
+    }}
+}}
+
+where "sectors" are in percentages and "gdp" is in dollars.
+
+The user query is: "{user_query}"
+
+Please convert this into a valid MongoDB query and necessary parameters like "projection", "filter" etc to retrieve only the necessary fields. Never include the field "_id" in your response. 
+
+Your response should be a JSON object of the structure below :
+"{{'query': <valid mongo db query>, 'params' : <parameter values for projection, filter etc>}}"
+
+For example :
+Query : What is the gdp % contribution of services sector in North America in 2023?
+Your response : {{'query' : {{'region': 'North America', 'year' : 2023}}, 'params' : {{'projection' : {{'data.economy.sectors.services': 1}}}}}}
+
+If the query cannot be processed based on the document model given above, respond with a fallback message in JSON format like - 
+{{"query": "Unsupported Query - requested information not retrievable"}}
