@@ -9,7 +9,7 @@ query_handler = QueryHandler()
 def test_valid_user_query():
     valid_user_query =  'What is the total population of North America in 2023?'
     valid_mongo_query_expected = {'region': 'North America', 'year': 2023}
-    valid_mongo_query_actual = query_handler.user_query_to_mongo_query(valid_user_query)['query']
+    valid_mongo_query_actual = query_handler.simple_user_query_to_mongo_query(valid_user_query)['query']
     assert valid_mongo_query_expected == valid_mongo_query_actual, "Mongo query generated is different"
 
 # mongo query to query result tests
@@ -30,7 +30,7 @@ def test_querying_with_missing_field():
         query_handler.answer_query(user_query)
 
 def test_querying_with_incorrect_year():
-    user_query = 'What is the total population of region Africa in 202003?'
+    user_query = 'What is the total population of North America in the year 202003?'
     with pytest.raises(IncorrectYearError):
         query_handler.answer_query(user_query)
 
@@ -71,3 +71,30 @@ def test_aggregation_query_classification():
     expected_query_class = 'aggregation'
     actual_query_class = query_handler.classify_user_query(user_query)
     assert expected_query_class == actual_query_class
+
+def test_querying_valid_aggregation_user_query():
+    agg_user_query = 'What is the combined gdp contribution of industry and services sector to Europe in 2023?'
+    expected_query_response = 'The combined GDP contribution of the industry and services sectors to Europe in 2023 is $24,250,000,000.'
+    actual_query_response = query_handler.answer_query(agg_user_query)
+    assert expected_query_response == actual_query_response, f"Expected response is {expected_query_response} but got {actual_query_response}"
+
+def test_valid_aggregation_user_query():
+    agg_user_query = "What is the average of percentage gdp contribution of services and industry sector of region Africa in 2023?"
+    expected_agg_mongo_query = """[{'$match': {'region': 'Africa', 'year': 2023}},
+  {'$group': {'_id': None,
+    'average_service_contribution': {'$avg': '$data.economy.sectors.services'},
+    'average_industry_contribution': {'$avg': '$data.economy.sectors.industry'}}},
+  {'$project': {'average_gdp_contribution': {'$avg': ['$average_service_contribution',
+      '$average_industry_contribution']}}}]"""
+    actual_agg_mongo_query = query_handler.agg_user_query_to_mongo_query(agg_user_query)['query']
+    assert expected_agg_mongo_query == str(actual_agg_mongo_query), f"Expected response is {expected_agg_mongo_query} but got {actual_agg_mongo_query}"
+
+def test_querying_aggregation_user_query_with_missing_field():
+    agg_user_query = 'What is the average unemployment rate in 2023 for the regions - Africa, North America and Asia?'
+    with pytest.raises(FieldMissingError):
+        query_handler.answer_query(agg_user_query)
+
+def test_quering_aggregation_user_query_with_unavailable_data():
+    agg_user_query = "What is the average % gdp contribution of services and industry sector of region Atlantis in 2023?"
+    with pytest.raises(DataNotFoundError):
+        query_handler.answer_query(agg_user_query)

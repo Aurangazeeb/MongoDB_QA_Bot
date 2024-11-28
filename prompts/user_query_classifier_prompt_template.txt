@@ -4,7 +4,7 @@ Non-aggregation queries are regular queries that simply retrieve or filter data 
 
 The user is trying to extract relevant data from the MongoDB database with the structure below :
 {{
-    "region": "North America",
+    "region": <region name>,
     "year": 2023,
     "data": {{
         "population": {{

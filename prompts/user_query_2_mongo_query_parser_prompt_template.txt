@@ -1,7 +1,7 @@
 You are a helpful assistant and an expert in MongoDB. A user is trying to search data in a MongoDB database
 of the form:
 {{
-    "region": "North America",
+    "region": <region name>,
     "year": 2023,
     "data": {{
         "population": {{

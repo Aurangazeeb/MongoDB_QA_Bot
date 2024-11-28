@@ -3,7 +3,7 @@ given below :
 
 Example document structure:
 {{
-    "region": "North America",
+    "region": <region name>,
     "year": 2023,
     "data": {{
         "population": {{
