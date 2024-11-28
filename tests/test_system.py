@@ -79,13 +79,10 @@ def test_querying_valid_aggregation_user_query():
     assert expected_query_response == actual_query_response, f"Expected response is {expected_query_response} but got {actual_query_response}"
 
 def test_valid_aggregation_user_query():
-    agg_user_query = "What is the average of percentage gdp contribution of services and industry sector of region Africa in 2023?"
-    expected_agg_mongo_query = """[{'$match': {'region': 'Africa', 'year': 2023}},
-  {'$group': {'_id': None,
-    'average_service_contribution': {'$avg': '$data.economy.sectors.services'},
-    'average_industry_contribution': {'$avg': '$data.economy.sectors.industry'}}},
-  {'$project': {'average_gdp_contribution': {'$avg': ['$average_service_contribution',
-      '$average_industry_contribution']}}}]"""
+    agg_user_query = "What is the combined gdp contribution % of services and industry sector of region Africa in 2023?"
+    expected_agg_mongo_query = str([{'$match': {'region': 'Africa', 'year': 2023}},
+  {'$project': {'combined_gdp_contribution': {'$add': ['$data.economy.sectors.industry',
+      '$data.economy.sectors.services']}}}])
     actual_agg_mongo_query = query_handler.agg_user_query_to_mongo_query(agg_user_query)['query']
     assert expected_agg_mongo_query == str(actual_agg_mongo_query), f"Expected response is {expected_agg_mongo_query} but got {actual_agg_mongo_query}"
 
