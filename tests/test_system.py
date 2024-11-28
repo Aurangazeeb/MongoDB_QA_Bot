@@ -1,6 +1,7 @@
 import pytest
 from src.bot_exceptions import DataNotFoundError, FieldMissingError, IncorrectYearError, ViolationOfDocumentStructureError
 from src.handle_query import QueryHandler
+import time
 
 query_handler = QueryHandler()
 
@@ -43,5 +44,30 @@ def test_querying_with_a_different_age_range():
     with pytest.raises(ViolationOfDocumentStructureError):
         query_handler.answer_query(user_query)
 
+def test_querying_with_minor_mistakes_in_user_query():
+    user_query_with_typo = 'What is the gdp of the North AMrica in 2023?'
+    expected_response = 'The GDP of North America in 2023 is $23,000,000,000.'
+    actual_response = query_handler.answer_query(user_query_with_typo)
+    assert expected_response == actual_response, f"Expected response was {expected_response}, but got {actual_response}"
 
+def test_in_memory_caching_performance():
+    user_query = 'What is the gdp of the North America in 2023?'
+    start = time.time()
+    query_handler.answer_query(user_query)
+    non_cached_duration = time.time() - start
+    cached_query_start = time.time()
+    query_handler.answer_query(user_query)
+    cached_duration = time.time() - cached_query_start
+    assert cached_duration < non_cached_duration, f"Expected cached query latency < non-cached query latency, but was greater"
 
+def test_non_aggregation_query_classification():
+    user_query = 'What is the total population of North America in 2023?'
+    expected_query_class = 'non-aggregation'
+    actual_query_class = query_handler.classify_user_query(user_query)
+    assert expected_query_class == actual_query_class
+
+def test_aggregation_query_classification():
+    user_query = 'What is the average GDP of all regions in 2023?'
+    expected_query_class = 'aggregation'
+    actual_query_class = query_handler.classify_user_query(user_query)
+    assert expected_query_class == actual_query_class

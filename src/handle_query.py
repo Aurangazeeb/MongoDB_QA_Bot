@@ -1,16 +1,18 @@
 import json
 import re
+
+from langchain.chains.summarize.map_reduce_prompt import prompt_template
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from src.handle_bot_exception import BotResponseExceptionHandler as brh
+import hashlib
 from warnings import filterwarnings
 filterwarnings('ignore')
 
 load_dotenv('.env', override=True)
-# ROOT_DIR = Path(os.environ['ROOT_DIR']).absolute().parent
 MONGODB_CONNECTION_STRING = os.environ['MONGODB_CONNECTION_STRING']
 SAMPLE_DOC_PATH = os.environ['DOC_PATH']
 DB_NAME = os.environ['DB_NAME']
@@ -18,7 +20,10 @@ COLLECTION_NAME = os.environ['COLLECTION_NAME']
 OPENAI_MODEL_NAME = os.environ['OPENAI_MODEL_NAME']
 USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE = os.environ['USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE']
 MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE = os.environ['MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE']
+USER_QUERY_CLASSIFIER_PROMPT_TEMPLATE = os.environ['USER_QUERY_CLASSIFIER_PROMPT_TEMPLATE']
 
+# simple in memory caching
+cache = {}
 
 class QueryHandler:
     def __init__(self):
@@ -26,18 +31,20 @@ class QueryHandler:
         self.collection = self.client[DB_NAME][COLLECTION_NAME]
         self.parser_llm = ChatOpenAI(model=OPENAI_MODEL_NAME, temperature=0, response_format = {'type' : 'json_object'})
         self.explainer_llm = ChatOpenAI(model=OPENAI_MODEL_NAME, temperature=0, response_format = {'type' : 'text'})
-        self.user_query_parsing_prompt = self._get_user_query_to_mongo_query_parsing_prompt()
-        self.mongo_result_parsing_prompt = self._get_mongo_result_to_natural_response_prompt()
+        self.user_query_parsing_prompt = self._get_prompt(USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE)
+        self.user_query_classifier_prompt = self._get_prompt(USER_QUERY_CLASSIFIER_PROMPT_TEMPLATE)
+        self.mongo_result_parsing_prompt = self._get_prompt(MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE)
         self.user_query_parsing_llm_chain = self.user_query_parsing_prompt | self.parser_llm
         self.mongo_result_parsing_llm_chain = self.mongo_result_parsing_prompt | self.explainer_llm
+        self.uesr_query_classifier_llm_chain = self.user_query_classifier_prompt | self.explainer_llm
 
-    def _get_user_query_to_mongo_query_parsing_prompt(self):
-        with open(USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE) as file:
-            prompt_template = file.read()
-        return PromptTemplate(input_variables = ['user_query'], template = prompt_template)
+    # Helper function to generate a cache key from the user query
+    def generate_cache_key(self, user_query):
+        # Use a hash of the user query as the cache key (to ensure uniqueness)
+        return hashlib.md5(user_query.encode('utf-8')).hexdigest()
 
-    def _get_mongo_result_to_natural_response_prompt(self):
-        with open(MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE) as file:
+    def _get_prompt(self, template_path):
+        with open(template_path) as file:
             prompt_template = file.read()
         return PromptTemplate(input_variables = ['user_query'], template = prompt_template)
 
@@ -65,18 +72,27 @@ class QueryHandler:
         else:
             return True
     def answer_query(self, user_query):
-        mongo_query = self.user_query_to_mongo_query(user_query)
-        if self.is_mongo_query_valid(mongo_query):
-            mongo_cursor = self.run_query(mongo_query)
-            if mongo_cursor:
-                return self.mongo_result_to_nl_response(user_query, mongo_cursor)
+        user_query_cache_key = self.generate_cache_key(user_query)
+        if user_query_cache_key not in cache:
+            mongo_query = self.user_query_to_mongo_query(user_query)
+            if self.is_mongo_query_valid(mongo_query):
+                mongo_cursor = self.run_query(mongo_query)
+                if mongo_cursor:
+                    nl_response =  self.mongo_result_to_nl_response(user_query, mongo_cursor)
+                    cache[user_query_cache_key] = nl_response
+                    return nl_response
+                else:
+                    print('Data not found exception')
+                    brh.handle_exception()
             else:
-                print('Data not found exception')
-                brh.handle_exception()
+                exception_title, exception_message = self.parse_query_exception(mongo_query['query'])
+                print('Exception title : ', exception_title)
+                brh.handle_exception(exception_title, exception_message)
         else:
-            exception_title, exception_message = self.parse_query_exception(mongo_query['query'])
-            print('Exception title : ', exception_title)
-            brh.handle_exception(exception_title, exception_message)
+            return cache[user_query_cache_key]
+
+    def classify_user_query(self, user_query):
+        return self.uesr_query_classifier_llm_chain.invoke({'user_query': user_query}).content
 
 
 
