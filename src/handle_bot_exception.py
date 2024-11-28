@@ -10,5 +10,7 @@ class BotResponseExceptionHandler:
                 raise IncorrectYearError(exception_message)
             elif any([title_str for title_str in ['range', 'specific'] if title_str in exception_title.lower()]):
                 raise ViolationOfDocumentStructureError(exception_message)
+            else:
+                raise Exception(f"Unknown error : {exception_message}")
         else:
             raise DataNotFoundError

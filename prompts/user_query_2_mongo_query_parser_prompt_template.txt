@@ -28,7 +28,7 @@ only.
 
 The user query : "{user_query}"
 
-Using the above document structure as reference convert the above user query into a valid MongoDB query and the necessary parameters like "projection", "filter" etc to retrieve only the necessary fields. Never include the field "_id" in your response. Do not use any external information while creating the query.
+Using the above document structure as reference, convert the above user query into a valid MongoDB query and the necessary parameters like "projection", "filter" etc to retrieve only the necessary fields. Never include the field "_id" in your response. Do not use any external information while creating the query.
 
 Your response should be a JSON object of the structure below :
 "{{'query': <valid mongo db query>, 'params' : <parameter values for projection, filter etc>}}"
