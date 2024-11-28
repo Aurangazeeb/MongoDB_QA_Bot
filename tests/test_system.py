@@ -1,5 +1,6 @@
-import json
+import pytest
 
+from bot_exceptions import DataNotFoundError, FieldMissingError, IncorrectYearError, ViolationOfDocumentStructureError
 from handle_query import QueryHandler
 query_handler = QueryHandler()
 
@@ -17,15 +18,36 @@ def test_unsupported_user_query():
     assert unsupported_user_query_response_expected == unsupported_user_query_response_actual, "Mongo query generated is different"
 
 # mongo query to query result tests
-def test_querying_available_data():
-    user_query = ''
-    expected_query_response = 'The total population of North America in 2023 is 579,024,000.'
-    actual_query_response = query_handler.an
+def test_querying_on_available_data():
+    user_query = 'What is the total population of the region Europe in 2023?'
+    expected_query_response = 'The total population of Europe in 2023 is 748,420,000.'
+    actual_query_response = query_handler.answer_query(user_query)
+    assert expected_query_response == actual_query_response, f"Expected response was {expected_query_response} but got {actual_query_response}"
 
-def test_querying_unavailable_data():
-invalid_mongo_query
-invalid_mongo_query_result_expected
-invalid_mongo_query_result_actual
+def test_querying_on_unavailable_data():
+    user_query = 'What is the total population of region East Japan in 2023?'
+    with pytest.raises(DataNotFoundError):
+        query_handler.answer_query(user_query)
+
+def test_querying_with_missing_field():
+    user_query = 'What is the birth rate of Africa in 2023?'
+    with pytest.raises(FieldMissingError):
+        query_handler.answer_query(user_query)
+
+def test_querying_with_incorrect_year():
+    user_query = 'What is the total population of region Africa in 202003?'
+    with pytest.raises(IncorrectYearError):
+        query_handler.answer_query(user_query)
+
+def test_querying_with_a_specific_age():
+    user_query = 'What is the number of people of age 10 in North America in 2023?'
+    with pytest.raises(ViolationOfDocumentStructureError):
+        query_handler.answer_query(user_query)
+
+def test_querying_with_a_different_age_range():
+    user_query = 'What is the number of people between the age of 50 and 55 in Asia in 2023?'
+    with pytest.raises(ViolationOfDocumentStructureError):
+        query_handler.answer_query(user_query)
 
 
 
