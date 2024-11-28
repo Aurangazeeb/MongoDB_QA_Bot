@@ -26,7 +26,9 @@ first using the command `chmod +x setup_db.sh`. This script will create the samp
 
 ## Running the Command-Line App
 1. After the database is setup, make sure to install all dependencies using `pip install -r requirements.txt`
-2. Then the app can be used via the command below:
+2. The LLM backend used in this project is OpenAI, hence make sure to update the
+`OPENAI_API_KEY` variable value in `.env` file before proceeding.
+3. Then the app can be used via the command below:
 `python app.py -q <your query>`
 
 ## Example usage
