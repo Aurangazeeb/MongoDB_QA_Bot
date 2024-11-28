@@ -47,11 +47,13 @@ class QueryHandler:
         # Use a hash of the user query as the cache key (to ensure uniqueness)
         return hashlib.md5(user_query.encode('utf-8')).hexdigest()
 
+    # helper function that returns langchain compatible prompt
     def _get_prompt(self, template_path):
         with open(template_path) as file:
             prompt_template = file.read()
         return PromptTemplate(input_variables = ['user_query'], template = prompt_template)
 
+    # helper function that parses user query to mongo query as well as classifies the user query into aggregation or not
     def user_query_to_mongo_query(self, user_query):
         query_class = self.classify_user_query(user_query)
         if query_class == 'non-aggregation':
@@ -60,7 +62,7 @@ class QueryHandler:
             mongo_query = self.agg_user_query_to_mongo_query(user_query)
         return mongo_query, query_class
 
-
+    # helper function that converts non-aggregation user queries to mongo queries
     def simple_user_query_to_mongo_query(self, user_query):
         response = self.user_query_parsing_llm_chain.invoke(user_query).content
         try:
@@ -69,27 +71,49 @@ class QueryHandler:
             response = re.search(r'```json\n(.*)\n```', response, flags = re.MULTILINE | re.DOTALL).group(1)
             return json.loads(response)
 
+    # helper function that converts aggregation user queries to mongo queries
+    def agg_user_query_to_mongo_query(self, user_query):
+        response = self.agg_user_query_parsing_llm_chain.invoke({'user_query' : user_query}).content
+        try:
+            response = json.loads(response)
+        except json.JSONDecodeError:
+            response = re.search(r'```json\n(.*)\n```', response, flags = re.MULTILINE | re.DOTALL).group(1)
+            response = json.loads(response)
+        return response
+
+    # helper function that returns result of mongo query execution depending on the user query type
     def run_query(self, mongo_query, user_query_class):
         if user_query_class != 'aggregation':
             return self.run_simple_query(mongo_query)
         else:
             return self.run_agg_query(mongo_query)
 
+    # helper function that returns result of mongo query execution for non-aggregation type user query
     def run_simple_query(self, mongo_query):
         return list(self.collection.find(mongo_query['query'], **mongo_query['params']))
+
+    # helper function that returns result of mongo query execution for aggregation type user query
+    def run_agg_query(self, agg_mongo_query):
+        return list(self.collection.aggregate(agg_mongo_query['query']))
+
+    # helper function that generates natural language response of the obtain mongo query resultset
     def mongo_result_to_nl_response(self, user_query, mongo_result):
         return self.mongo_result_parsing_llm_chain.invoke({'user_query': user_query, 'mongo_result' : str(mongo_result)}).content
 
+    # helfper function that parses responses for handling errors
     def parse_query_exception(self, exception_reason):
         exception_title, exception_message = re.search(r'Unsupported Query - ([\w\s?]+): (.*)', exception_reason).groups()
         return exception_title, exception_message
 
+    # helper function to check for validity of mongo query generated
     def is_mongo_query_valid(self, mongo_query):
         if 'Unsupported Query' in mongo_query['query']:
             return False
         else:
             return True
 
+    # the main function that brings together the entire logic of the bot - it takes in user query
+    # and generates appropriate response
     def answer_query(self, user_query):
         user_query_cache_key = self.generate_cache_key(user_query)
         if user_query_cache_key not in cache:
@@ -112,20 +136,13 @@ class QueryHandler:
         else:
             return cache[user_query_cache_key]
 
+    # helper function that classifies user query whether or not it is an aggregation type or not
     def classify_user_query(self, user_query):
         return self.uesr_query_classifier_llm_chain.invoke({'user_query': user_query}).content
 
-    def agg_user_query_to_mongo_query(self, user_query):
-        response = self.agg_user_query_parsing_llm_chain.invoke({'user_query' : user_query}).content
-        try:
-            response = json.loads(response)
-        except json.JSONDecodeError:
-            response = re.search(r'```json\n(.*)\n```', response, flags = re.MULTILINE | re.DOTALL).group(1)
-            response = json.loads(response)
-        return response
 
-    def run_agg_query(self, agg_mongo_query):
-        return list(self.collection.aggregate(agg_mongo_query['query']))
+
+
 
 
 

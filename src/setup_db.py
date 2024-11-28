@@ -4,6 +4,7 @@ import json
 import os
 from dotenv import load_dotenv
 
+# loading all secrets into environment
 load_dotenv('.env')
 MONGODB_CONNECTION_STRING = os.environ['MONGODB_CONNECTION_STRING']
 SAMPLE_DOC_PATH = os.environ['DOC_PATH']
@@ -17,10 +18,11 @@ def setup_database():
     db = client[DB_NAME]
     stats_collection = db[COLLECTION_NAME]
 
+    # loading up sample documents to populate the table
     with open(SAMPLE_DOC_PATH) as file:
         documents = json.load(file)
 
-    # Insert multiple documents (add more as needed)
+    # Insert all documents into the collection
     stats_collection.insert_many(documents)
     print(f"Documents inserted into collection : {COLLECTION_NAME}")
 

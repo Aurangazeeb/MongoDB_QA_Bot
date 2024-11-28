@@ -1,3 +1,5 @@
+# a common file to bring together all types of exceptions recognized by this bot
+
 class FieldMissingError(Exception):
     pass
 class IncorrectYearError(Exception):

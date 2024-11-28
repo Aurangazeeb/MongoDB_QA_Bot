@@ -1,6 +1,10 @@
 from src.bot_exceptions import FieldMissingError, IncorrectYearError, ViolationOfDocumentStructureError, DataNotFoundError
 
+
 class BotResponseExceptionHandler:
+    """
+    A class dedicated to handle all known exception raised by this bot
+    """
     @staticmethod
     def handle_exception(exception_title=None, exception_message= None):
         if exception_title:
