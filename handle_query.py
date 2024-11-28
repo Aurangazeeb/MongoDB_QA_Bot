@@ -6,15 +6,17 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from handle_bot_exception import BotResponseExceptionHandler as brh
+from pathlib import Path
 
 load_dotenv('./.env')
+ROOT_DIR = Path(__file__).absolute().parent
 MONGODB_CONNECTION_STRING = os.environ['MONGODB_CONNECTION_STRING']
 SAMPLE_DOC_PATH = os.environ['SAMPLE_DOC_PATH']
 DB_NAME = os.environ['DB_NAME']
 COLLECTION_NAME = os.environ['COLLECTION_NAME']
 OPENAI_MODEL_NAME = os.environ['OPENAI_MODEL_NAME']
-USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE = os.environ['USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE']
-MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE = os.environ['MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE']
+USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE = ROOT_DIR / os.environ['USER_QUERY_2_MONGO_QUERY_PARSING_PROMPT_TEMPLATE']
+MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE = ROOT_DIR / os.environ['MONGO_RESULT_2_NL_RESPONSE_PROMPT_TEMPLATE']
 
 
 class QueryHandler:
