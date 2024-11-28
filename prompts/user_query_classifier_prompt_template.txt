@@ -1,4 +1,4 @@
-You are an expert in MongoDB and a user query classifier and your task. Your task is to determine if a given user query is an aggregation query or non-aggregation query.
+You are an expert in MongoDB and a user query classifier. Your task is to determine if a given user query is an aggregation query or non-aggregation query.
 Aggregation queries typically involve operations like counting, summing, averaging, finding maximum/minimum values, or grouping data. These queries usually require operations that summarize or aggregate data across one or more fields, often with conditions or groupings.
 Non-aggregation queries are regular queries that simply retrieve or filter data without performing any summarization or calculation.
 
@@ -36,4 +36,4 @@ Response : non-aggregation
 The above query was classified as non-aggregation because "total" field of population was already available in the document structure.
 
 Here is the user query :
-{user_query}'''
+{user_query}

@@ -4,7 +4,7 @@ class BotResponseExceptionHandler:
     @staticmethod
     def handle_exception(exception_title=None, exception_message= None):
         if exception_title:
-            if 'missing' in exception_title.lower():
+            if any([title_str for title_str in ['missing', 'found', 'no data'] if title_str in exception_title.lower()]):
                 raise FieldMissingError(exception_message)
             elif 'year' in exception_title.lower():
                 raise IncorrectYearError(exception_message)

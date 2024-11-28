@@ -75,15 +75,22 @@ class QueryHandler:
         user_query_cache_key = self.generate_cache_key(user_query)
         if user_query_cache_key not in cache:
             mongo_query = self.user_query_to_mongo_query(user_query)
+            # if mongo query is valid - it can be executed
             if self.is_mongo_query_valid(mongo_query):
-                mongo_cursor = self.run_query(mongo_query)
-                if mongo_cursor:
-                    nl_response =  self.mongo_result_to_nl_response(user_query, mongo_cursor)
-                    cache[user_query_cache_key] = nl_response
-                    return nl_response
+                user_query_class = self.classify_user_query(user_query)
+                # if user query corresponds to non-aggregation
+                if user_query_class != 'aggregation':
+                    mongo_cursor = self.run_query(mongo_query)
+                    if mongo_cursor:
+                        nl_response =  self.mongo_result_to_nl_response(user_query, mongo_cursor)
+                        cache[user_query_cache_key] = nl_response
+                        return nl_response
+                    else:
+                        brh.handle_exception()
+                # if user query is of aggregation type
                 else:
-                    print('Data not found exception')
-                    brh.handle_exception()
+                    ...
+            # if mongo query is invalid - handle the situation
             else:
                 exception_title, exception_message = self.parse_query_exception(mongo_query['query'])
                 print('Exception title : ', exception_title)
