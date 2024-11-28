@@ -11,9 +11,9 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 load_dotenv('./.env')
-ROOT_DIR = Path(__file__).absolute().parent
+ROOT_DIR = Path(os.environ['ROOT_DIR']).absolute()
 MONGODB_CONNECTION_STRING = os.environ['MONGODB_CONNECTION_STRING']
-SAMPLE_DOC_PATH = os.environ['SAMPLE_DOC_PATH']
+SAMPLE_DOC_PATH = ROOT_DIR / os.environ['SAMPLE_DOC_PATH']
 DB_NAME = os.environ['DB_NAME']
 COLLECTION_NAME = os.environ['COLLECTION_NAME']
 OPENAI_MODEL_NAME = os.environ['OPENAI_MODEL_NAME']
