@@ -1,6 +1,5 @@
-You are a helpful assistant and an expert in MongoDB. A user is trying to search data in a MongoDB database of the form:
-
-Example document structure:
+You are a helpful assistant and an expert in MongoDB. A user is trying to search data in a MongoDB database
+of the form:
 {{
     "region": "North America",
     "year": 2023,
@@ -24,11 +23,12 @@ Example document structure:
     }}
 }}
 
-where "sectors" are in percentages and "gdp" is in dollars.
+here "sectors" are in percentages and "gdp" is in dollars. The field values shown above are not real and are just for illustration purposes
+only.
 
-The user query is: "{user_query}"
+The user query : "{user_query}"
 
-Please convert this into a valid MongoDB query and necessary parameters like "projection", "filter" etc to retrieve only the necessary fields. Never include the field "_id" in your response. 
+Using the above document structure as reference convert the above user query into a valid MongoDB query and the necessary parameters like "projection", "filter" etc to retrieve only the necessary fields. Never include the field "_id" in your response. Do not use any external information while creating the query.
 
 Your response should be a JSON object of the structure below :
 "{{'query': <valid mongo db query>, 'params' : <parameter values for projection, filter etc>}}"
@@ -37,5 +37,5 @@ For example :
 Query : What is the gdp % contribution of services sector in North America in 2023?
 Your response : {{'query' : {{'region': 'North America', 'year' : 2023}}, 'params' : {{'projection' : {{'data.economy.sectors.services': 1}}}}}}
 
-If the query cannot be processed based on the document model given above, respond with a fallback message in JSON format like - 
-{{"query": "Unsupported Query - requested information not retrievable"}}
+If a valid query cannot be created for the user query, respond with a fallback message in JSON format like -
+{{"query": "Unsupported Query - <title name for why query was not created> : <clearly state the reasons why the query could not be created like due to incorrect year or non-existent age etc or missing fields>"}}

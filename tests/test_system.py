@@ -1,5 +1,4 @@
 import pytest
-
 from bot_exceptions import DataNotFoundError, FieldMissingError, IncorrectYearError, ViolationOfDocumentStructureError
 from handle_query import QueryHandler
 query_handler = QueryHandler()

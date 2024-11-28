@@ -7,6 +7,8 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from handle_bot_exception import BotResponseExceptionHandler as brh
 from pathlib import Path
+from warnings import filterwarnings
+filterwarnings('ignore')
 
 load_dotenv('./.env')
 ROOT_DIR = Path(__file__).absolute().parent
