@@ -9,10 +9,10 @@ from src.handle_bot_exception import BotResponseExceptionHandler as brh
 from warnings import filterwarnings
 filterwarnings('ignore')
 
-load_dotenv('.env')
+load_dotenv('.env', override=True)
 # ROOT_DIR = Path(os.environ['ROOT_DIR']).absolute().parent
 MONGODB_CONNECTION_STRING = os.environ['MONGODB_CONNECTION_STRING']
-SAMPLE_DOC_PATH = os.environ['SAMPLE_DOC_PATH']
+SAMPLE_DOC_PATH = os.environ['DOC_PATH']
 DB_NAME = os.environ['DB_NAME']
 COLLECTION_NAME = os.environ['COLLECTION_NAME']
 OPENAI_MODEL_NAME = os.environ['OPENAI_MODEL_NAME']
