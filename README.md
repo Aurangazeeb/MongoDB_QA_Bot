@@ -49,8 +49,9 @@ queries and eventually the natural response version of it.
 
 ## Testing App Functionalities
 The app functionality testing is automated via `run_system_test.sh` bash script.
-Make sure to convert it to an executable before running it.
+Make sure to convert it to an executable before running it. 
+_All 15 tests were successfully passed when last run_.
 
 **Note** : Inspite of many iterations of prompt engineering and inclusion of
-techniques like few-shot learning, due to the stochastic behaviour of LLM on
+techniques like few-shot learning, due to the stochastic behaviour of LLM, on
 rare occassions one or two of the tests may fail. In such a case, please run the bash script again
