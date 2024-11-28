@@ -10,12 +10,6 @@ def test_valid_user_query():
     valid_mongo_query_actual = query_handler.user_query_to_mongo_query(valid_user_query)['query']
     assert valid_mongo_query_expected == valid_mongo_query_actual, "Mongo query generated is different"
 
-# def test_valid_user_query_with_condition():
-#     invalid_user_query = 'What was the total population of Atlantis in 2023?'
-#     invalid_mongo_query_expected = {'region': 'Atlantis', 'year': 2023}
-#     invalid_mongo_query_actual = query_handler.user_query_to_mongo_query(invalid_user_query)['query']
-#     assert invalid_mongo_query_expected == invalid_mongo_query_actual, "Mongo query generated is different"
-
 def test_unsupported_user_query():
     unsupported_user_query = 'What was the birth rate of Atlantis in 2023?'
     unsupported_user_query_response_expected = 'Unsupported Query - requested information not retrievable'
